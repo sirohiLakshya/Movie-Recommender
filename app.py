@@ -4,21 +4,23 @@ import streamlit as st
 import pickle
 import requests
 
-st.set_page_config(  # Alternate names: setup_page, page, layout
-    layout="wide",  # Can be "centered" or "wide". In the future also "dashboard", etc.
-    page_icon=None,  # String, anything supported by st.image, or None.
-    page_title='Movie Recommender'
+#Keeping the layout as wide by default
 
+st.set_page_config(  
+    layout="wide", 
+    page_icon=None,
+    page_title='Movie Recommender'
 )
 
+#Setting the distance between the top of the page and the heading 
 st.write('<style>div.block-container{padding-top:2rem;}</style>', unsafe_allow_html=True)
 
+#Setting the background image for the page
 
 def get_base64(bin_file):
     with open(bin_file, 'rb') as f:
         data = f.read()
         return base64.b64encode(data).decode()
-
 
 def set_background(png_file):
     bin_str = get_base64(png_file)
@@ -32,9 +34,10 @@ def set_background(png_file):
     ''' % bin_str
     st.markdown(page_bg_img, unsafe_allow_html=True)
 
-
 set_background('bgf.png')
 
+#Making a function to get the poster path from a movie id and it will send a request to the TMDB for the poster, 
+#for sending such requests we need requests library to be imported
 
 def fetch_poster(movie_id):
     response = requests.get(
@@ -43,6 +46,7 @@ def fetch_poster(movie_id):
     data = response.json()
     return "http://image.tmdb.org/t/p/w500/" + data['poster_path']
 
+#Making a function to get the recommended movies name and posters
 
 def recommend(movie):
     movie_index = movies[movies['title'] == movie].index[0]  # Getting the index of the movies
@@ -59,18 +63,23 @@ def recommend(movie):
         recommended_movies_posters.append(fetch_poster(movie_id))
     return recommended_movies, recommended_movies_posters
 
-
+#To get the the movie title from the movie dictionary file
 movie_dict = pickle.load(open('movie_dict.pkl', 'rb'))
 movies = pd.DataFrame(movie_dict)
 
+#Making a function to get the cosine similarity values from our ML model through the similarity.pkl file
 similarity = pickle.load(open('similarity.pkl', 'rb'))
 
+#Setting the title for the first search bar
 st.title('Movie Recommender')
 
+#Making a text box to take input from user
 selected_movie_name = st.selectbox('Movies similar to:', movies['title'].values)
 
+#Making a button for user to get the recommendations
 if st.button('Recommend'):
     names, posters = recommend(selected_movie_name)
+    #to display the movie names and posters
     col1, col2, col3, col4, col5 = st.columns(5)
 
     with col1:
@@ -114,23 +123,17 @@ if st.button('Recommend'):
     with col10:
         st.text(names[9])
         st.image(posters[9])
-# st.markdown(
-# """
-# <style>
-# .stProgress > div > div > div > div {
-# background-color: #a76751;
-# }
-# </style>""",
-# unsafe_allow_html=True,
-# )
 
+#To set the title for the 2nd search bar
 st.title('Know Your Next Movie')
 title = st.text_input("Type the title and press Enter")
 if title:
     try:
+        #sending request to omdb for getting movie details
         url = f"http://www.omdbapi.com/?t={title}&apikey=d6782a35"
         re = requests.get(url)
         re = re.json()
+        #To display the poster and other relevant details of the movie 
         col1, col2 = st.columns([1, 2])
         with col1:
             st.image(re['Poster'])
@@ -147,4 +150,4 @@ if title:
             st.progress(float(re['Metascore']) / 100)
 
     except:
-        st.error('No movie found or some data missing!')
+        st.error('No movie found or some data missing!') 
