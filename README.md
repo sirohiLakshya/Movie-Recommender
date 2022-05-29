@@ -20,7 +20,9 @@ Libraries Used:
 -Numpy  
 -Pickle 
 
-Machine Learning Model: Bag of Words (BoW)  
+Machine Learning Model: 
+-Content based filetring: For example, if a user likes to watch movies such as Iron Man, then the recommender system recommends movies of the sci-fi genre or movies of Robert Downy Jr..
+-Algorithm: Bag of Words (BoW)  
       
 Data files:  
 -1. tmdb_5000_credits.csv  
